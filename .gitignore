@@ -1,0 +1,9 @@
+# export model projects ignore
+__pycache__/
+.vscode/
+*.onnx
+
+# cpp projects on atlas device ignore
+build/
+data/
+out/
