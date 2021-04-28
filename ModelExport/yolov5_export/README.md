@@ -121,7 +121,12 @@ class Contract(nn.Module):
 是的，官方其实给出了替换方案，只是以注释的形式，并没有真正采用。看一下转出的`onnx`模型长啥样。      
 ![](../../asserts/focus_slice_replace_g.png)        
 不得不说，yolov5工程友好度基本上可以颁奖最佳了！但是测试后很快发现了一个问题！NPU模型转换不支持真么多维度的算子，并且引入`Transpose`算子后，NPU推理速度下降的可不止1倍！        
-**划重点**：Ascend NPU对`Transpose`算子虽然支持，但是计算速度极慢！所以尽量引入和规避这个算子！     
+模型转为`om`后可视化为      
+![](../../asserts/focus_slice_replace_g_om.png)     
+引入了`Transpose`算子……     
+实测推理速度变慢了4-5倍。       
+![](../../asserts/infer_time_g.png)     
+**划重点**：Ascend NPU对`Transpose`算子虽然支持，但是计算速度极慢！所以尽量避免引入和规避这个算子！     
 那么问题又回到了原点，如何高效的替换这个算子操作？！细品`Focus结构`这个计算方式，它的这种计算方式其实就是在做`group`卷积！根据卷积的计算方式，只是需要固定权重而已。        
 使用最直观的方式：      
 定义4个`group`卷积分别将输入数据进行计算，`kernal size`定义为`2x2`，`stride`为2，`padding`为0。
